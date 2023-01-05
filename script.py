@@ -140,21 +140,28 @@ def IQuestion(condition_a,condition_b,condition_c,condition_d,condition_e):
     return {"a":condition_a,"b":condition_b,"c":condition_c,"d":condition_d,"e":condition_e}
 
 
-id = pd.Series([])
-must = pd.Series([])
-mnasf = pd.Series([])
-snaq = pd.Series([])
-glim = pd.Series([])
+id = []
+must = []
+mnasf = []
+snaq = []
+glim = []
+
+must_txt = []
+mnasf_txt = []
+snaq_txt = []
+glim_txt = []
 
 print("-------------------------------")
 for i in data.iterrows():
     j = i[1]
     print(j["id"])
+    
     #questionA
     weight = int(j["weight_value"])
     BMI = weight/(j["height_value"]**2)
     AAnswers = AQuestion(BMI, j["age"])
     print("A", AAnswers)
+
     #questionB
     unintentional_weight_loss = int(j["choice"])
     unintentional_weight_loss_time = "d"
@@ -165,12 +172,14 @@ for i in data.iterrows():
         unintentional_weight_loss = 12
     BAnswers = BQuestion(unintentional_weight_loss, unintentional_weight_loss_time, weight)
     print("B", BAnswers)
+
     #questionC
     acute_diseas = j["acute_diseas"]
     psychological_stress = j["strong_psychological_stress"]
     no_nutritional = j["failure_to_eat_for_more_then_5_days"]
     CAnswers = CQuestion(acute_diseas, psychological_stress, no_nutritional)
     print("C", CAnswers)
+
     #questionD
     recently = j["decreased_food_consumtpion_recently"]
     month = j["decreased_food_consumption_last_month"]
@@ -186,21 +195,26 @@ for i in data.iterrows():
         elif(recently): food_intake_declined_time = "c"
     DAnswers = DQuestion(food_intake_declined, food_intake_declined_time, food_decrease)
     print("D", DAnswers)
+
     #questionE
     mobility = int(j["level_of_mobility"])
     EAnswers = EQuestion(mobility)
     print("E", EAnswers)
+
     #questionF
     neuropsychological_problems = int(j["neuropsychological"])
     FAnswers = FQuestion(neuropsychological_problems)
     print("F", FAnswers)
+
     #questionG
     #TODO
     GAnswers = GQuestion(2)
+
     #questionH
     muscle_mass = j["muscle_mass_value"]
     HAnswers = HQuestion(muscle_mass)
     print("H", HAnswers)
+
     #questionI
     condition_a = int(j["below_50_of_consumption_for_1_week"])
     condition_b = int(j["poor_consumption_for_more_than_2_weeks"])
@@ -211,48 +225,68 @@ for i in data.iterrows():
     print("I", IAnswers)
 
     print("FINAL SCORE REPORT")
+
     MUST_score = AAnswers["MUST"] + BAnswers["MUST"] + CAnswers["MUST"]
     print("MUST:",MUST_score)
+    must_out = ""
     if MUST_score == 0:
-        print("Low Risk")
+        must_out = "Low Risk"
     if MUST_score == 1:
-        print("Medium Risk")
+        must_out = "Medium Risk"
     if MUST_score > 1:
-        print("High Risk")
+        must_out = "High Risk"
+    print(must_out)
+    must_txt.append(must_out)
     print()
 
     MNA_SF_score = AAnswers["MNA_SF"] + BAnswers["MNA_SF"] + CAnswers["MNA_SF"] + DAnswers["MNA_SF"] + EAnswers["MNA_SF"] + FAnswers["MNA_SF"]
     print("MNA-SF:",MNA_SF_score)
+    mnasf_out = ""
     if MNA_SF_score <=14 and MNA_SF_score>=12:
-        print("Normal Nutrition")
+        mnasf_out = "Normal Nutrition"
     if MNA_SF_score <=12 and MNA_SF_score>=8:
-        print("At Risk of malnutrition")
+        mnasf_out = "At Risk of malnutrition"
     if MNA_SF_score <=7 and MNA_SF_score>=0:
-        print("Malnourished")
+        mnasf_out = "Malnourished"
+    print(mnasf_out)
+    mnasf_txt.append(mnasf_out)
     print()
 
     SNAQ_score = BAnswers["SNAQ"] + DAnswers["SNAQ"] + GAnswers["SNAQ"]
     print("SNAQ:",SNAQ_score)
+    snaq_out = ""
     if SNAQ_score>=0 and SNAQ_score<=1:
-        print("No Intervantion")
+        snaq_out = "No Intervantion"
     if SNAQ_score == 2:
-        print("Moderately malnourished; nutrition intervention")
+        snaq_out = "Moderately malnourished; nutrition intervention"
     if SNAQ_score >=3:
-        print("Severely malnourished; nutritional intervention and treatment")
+        snaq_out = "Severely malnourished; nutritional intervention and treatment"
+    print(snaq_out)
+    snaq_txt.append(snaq_out)
+    print()
 
     #Not Clear
     GLIM_score = 0
+    glim_out = ""
     if AAnswers["GLIM"] == 2 or BAnswers["GLIM"] == 2 or HAnswers["GLIM"] == 2:
         GLIM_score = 2
     elif AAnswers["GLIM"] == 1 or BAnswers["GLIM"] == 1 or HAnswers["GLIM"] == 1:
         GLIM_score = 1
     if GLIM_score>0 and IAnswers["a"] or IAnswers["b"] or IAnswers["c"] or IAnswers["d"] or IAnswers["e"]:
-        print("Malnutirtion Diagnosis")
+        glim_out = "Malnutirtion Diagnosis"
+    print(glim_out)
+    glim_txt.append(glim_out)
+    print()
 
-    must.add(MUST_score)
-    mnasf.add(MNA_SF_score)
-    snaq.add(SNAQ_score)
-    glim.add(GLIM_score)
+    id.append(j["id"])
+    must.append(MUST_score)
+    mnasf.append(MNA_SF_score)
+    snaq.append(SNAQ_score)
+    glim.append(GLIM_score)
 
-    print(pd.DataFrame(must, mnasf, snaq, glim))
-#OutputDataSet = pd.DataFrame(out);
+dataout = pd.DataFrame({"Id": id, "MUST": must, "MUST outcome": must_out,
+    "MNA-SF": mnasf, "MNA-SF outcome": mnasf_out,
+    "SNAQ": snaq, "SNAQ outcome": snaq_out,
+    "GLIM": glim, "GLIM outcome": glim_out})
+print(dataout)
+OutputDataSet = dataout;
