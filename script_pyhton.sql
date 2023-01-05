@@ -5,6 +5,7 @@ BEGIN
 EXECUTE sp_execute_external_script @language = N'Python'
     , @script = N'
 import pandas as pd
+import datetime as dt
 
 data = InputDataSet
 
@@ -157,7 +158,10 @@ mnasf_txt = []
 snaq_txt = []
 glim_txt = []
 
+date = []
+
 print("-------------------------------")
+time = dt.datetime.now()
 for i in data.iterrows():
     j = i[1]
     print(j["id"])
@@ -290,10 +294,12 @@ for i in data.iterrows():
     snaq.append(SNAQ_score)
     glim.append(GLIM_score)
 
+    date.append(time)
 dataout = pd.DataFrame({"Id": id, "MUST": must, "MUST outcome": must_out,
     "MNA-SF": mnasf, "MNA-SF outcome": mnasf_out,
     "SNAQ": snaq, "SNAQ outcome": snaq_out,
-    "GLIM": glim, "GLIM outcome": glim_out})
+    "GLIM": glim, "GLIM outcome": glim_out,
+    "datetime": date})
 print(dataout)
 OutputDataSet = dataout;'
     , @input_data_1 = N'/* query aggregata */
@@ -373,7 +379,8 @@ WHERE R = 1) w8 on w1.id = w8.hospitalization_id'
 WITH RESULT SETS((id INT, MUST_score INT, MUST_outcome VARCHAR(255),
     MNA_SF_score INT, MNA_SF_outcome VARCHAR(255),
     SNAQ_score INT, SNAQ_outcome VARCHAR(255),
-    GLIM_score INT, GLIM_outcome VARCHAR(255)));
+    GLIM_score INT, GLIM_outcome VARCHAR(255),
+    datetime datetime));
 
 END;
 GO
