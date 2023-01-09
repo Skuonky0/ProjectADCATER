@@ -1,0 +1,2 @@
+SELECT nutrition_screening_assessment.hospitalization_id, nutrition_screening_assessment.enternal_feeding
+FROM nutrition_screening_assessment

@@ -211,7 +211,8 @@ for i in data.iterrows():
     print("F", FAnswers)
 
     #questionG
-    #TODO
+    #supplement_drinks = int(j["enterenternal_feeding"])
+    #GAnswers = GQuestion(supplement_drinks)
     GAnswers = GQuestion(2)
 
     #questionH

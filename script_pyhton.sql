@@ -217,7 +217,8 @@ for i in data.iterrows():
     print("F", FAnswers)
 
     #questionG
-    #TODO
+    #supplement_drinks = int(j["enterenternal_feeding"])
+    #GAnswers = GQuestion(supplement_drinks)
     GAnswers = GQuestion(2)
 
     #questionH
@@ -385,5 +386,7 @@ WITH RESULT SETS((id INT, MUST_score INT, MUST_outcome VARCHAR(255),
 END;
 GO
 
+INSERT INTO result_nutrition_assessment
 EXECUTE assessment
 GO
+
