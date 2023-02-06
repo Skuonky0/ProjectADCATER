@@ -377,7 +377,7 @@ FROM (SELECT GLIM_assessment.hospitalization_id, GLIM_assessment.timestamp, GLIM
         ROW_NUMBER() over (PARTITION BY GLIM_assessment.hospitalization_id ORDER BY GLIM_assessment.timestamp DESC) as R
     FROM GLIM_assessment) t
 WHERE R = 1) w8 on w1.id = w8.hospitalization_id'
-WITH RESULT SETS((id INT, MUST_score INT, MUST_outcome VARCHAR(255),
+WITH RESULT SETS((hospitalization_id INT, MUST_score INT, MUST_outcome VARCHAR(255),
     MNA_SF_score INT, MNA_SF_outcome VARCHAR(255),
     SNAQ_score INT, SNAQ_outcome VARCHAR(255),
     GLIM_score INT, GLIM_outcome VARCHAR(255),
@@ -390,3 +390,4 @@ INSERT INTO result_nutrition_assessment
 EXECUTE assessment
 GO
 
+/*creare altra tabella con timestamp delle misurazioni + inserire id automatico nella tabella*/

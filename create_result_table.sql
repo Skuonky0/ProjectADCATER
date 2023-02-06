@@ -1,5 +1,6 @@
 CREATE TABLE result_nutrition_assessment (
-	id INT, MUST_score INT,
+    id INT IDENTITY(1,1) PRIMARY KEY,
+	hospitalization_id INT, MUST_score INT,
     MUST_outcome VARCHAR(255),
     MNA_SF_score INT,
     MNA_SF_outcome VARCHAR(255),
