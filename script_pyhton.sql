@@ -160,14 +160,33 @@ glim_txt = []
 
 date = []
 
+weight_timestamp = []
+height_timestamp = []
+weight_loss_timestamp = []
+med_staff_diagnosis_timestamp = []
+nutrition_screening_assessment_timestamp = []
+mobility_measurment_timestamp = []
+muscle_mass_measurment_timestamp = []
+GLIM_assessment_timestamp = []
+
 print("-------------------------------")
 time = dt.datetime.now()
 for i in data.iterrows():
     j = i[1]
     print(j["id"])
     
+    #timestamps
+    weight_timestamp.append(j["weight_timestamp"])
+    height_timestamp.append(j["height_timestamp"])
+    weight_loss_timestamp.append(j["weight_loss_timestamp"])
+    med_staff_diagnosis_timestamp.append(j["med_staff_diagnosis_timestamp"])
+    nutrition_screening_assessment_timestamp.append(j["nutrition_screening_assessment_timestamp"])
+    mobility_measurment_timestamp.append(j["mobility_measurment_timestamp"])
+    muscle_mass_measurment_timestamp.append(j["muscle_mass_measurment_timestamp"])
+    GLIM_assessment_timestamp.append(j["GLIM_assessment_timestamp"])
+    
     #questionA
-    weight = int(j["weight_value"])
+    weight = float(j["weight_value"])
     BMI = weight/(j["height_value"]**2)
     AAnswers = AQuestion(BMI, j["age"])
     print("A", AAnswers)
@@ -207,7 +226,14 @@ for i in data.iterrows():
     print("D", DAnswers)
 
     #questionE
-    mobility = int(j["level_of_mobility"])
+    mobility_val = j["level_of_mobility"]
+    mobility = 0
+    if(mobility_val == "Bed or chair bound (0)"):
+        mobility = 0
+    elif(mobility_val == "Able to get out of bed/chair but does not go out"):
+        mobility = 1
+    elif(mobility_val == "Goes Out (2)"):
+        mobility = 2
     EAnswers = EQuestion(mobility)
     print("E", EAnswers)
 
@@ -223,6 +249,14 @@ for i in data.iterrows():
 
     #questionH
     muscle_mass = j["muscle_mass_value"]
+    muscle_mass_val = j["level_of_mobility"]
+    muscle_mass = 0
+    if(muscle_mass_val == "Bigger then 22 cm (No deficit)"):
+        muscle_mass = 0
+    elif(muscle_mass_val == "Between 21-22 cm (Mild to moderate deficit)"):
+        muscle_mass = 1
+    elif(muscle_mass_val == "Lower then 21 cm (Severe deficit)"):
+        muscle_mass = 2
     HAnswers = HQuestion(muscle_mass)
     print("H", HAnswers)
 
@@ -300,88 +334,99 @@ dataout = pd.DataFrame({"Id": id, "MUST": must, "MUST outcome": must_out,
     "MNA-SF": mnasf, "MNA-SF outcome": mnasf_out,
     "SNAQ": snaq, "SNAQ outcome": snaq_out,
     "GLIM": glim, "GLIM outcome": glim_out,
-    "datetime": date})
+    "datetime": date,
+    "weight_timestamp" : weight_timestamp,
+    "height_timestamp" : height_timestamp,
+    "weight_loss_timestamp" : weight_loss_timestamp,
+    "med_staff_diagnosis_timestamp" : med_staff_diagnosis_timestamp,
+    "nutrition_screening_assessment_timestamp" : nutrition_screening_assessment_timestamp,
+    "mobility_measurment_timestamp" : mobility_measurment_timestamp,
+    "muscle_mass_measurment_timestamp" : muscle_mass_measurment_timestamp,
+    "GLIM_assessment_timestamp" : GLIM_assessment_timestamp
+    })
 print(dataout)
 OutputDataSet = dataout;'
-    , @input_data_1 = N'/* query aggregata */
-
-SELECT w1.id, w1.age, w1.weight_value, w1.height_value, w2.choice, w2.last_month, w2.last_3_months, w2.last_6_months, w3.acute_diseas,
-    w3.strong_psychological_stress, w3.failure_to_eat_for_more_then_5_days, w4.decreased_food_consumtpion_recently, w4.decreased_food_consumption_last_month,
-    w4.decresead_food_consumption_last_3_months, w5.level_of_mobility, w6.neuropsychological, w7.muscle_mass_value,
-    w8.below_50_of_consumption_for_1_week, w8.poor_consumption_for_more_than_2_weeks, w8.gastro_intestinal_condition, w8.acute_illness_or_injury,
-    w8.information_from_chronic_disease
-FROM (SELECT hospitalization.id, hospitalization.age, q1.weight_value, q2.height_value
+    , @input_data_1 = N'
+SELECT hospitalization.id, hospitalization.age, q1.weight_value, q1.weight_timestamp,
+    q2.height_value, q2.height_timestamp,
+    q3.choice, q3.last_month, q3.last_3_months, q3.last_6_months, q3.weight_loss_timestamp,
+    q4.acute_diseas, q4.strong_psychological_stress, q4.neuropsychological, q4.med_staff_diagnosis_timestamp,
+    q5.decreased_food_consumtpion_recently, q5.decreased_food_consumption_last_month, q5.decresead_food_consumption_last_3_months,
+    q5.enternal_feeding, q5.failure_to_eat_for_more_then_5_days, q5.nutrition_screening_assessment_timestamp,
+    q6.level_of_mobility, q6.mobility_measurment_timestamp,
+    q7.muscle_mass_value, q7.muscle_mass_measurment_timestamp,
+    q8.below_50_of_consumption_for_1_week, q8.poor_consumption_for_more_than_2_weeks, q8.gastro_intestinal_condition,
+    q8.acute_illness_or_injury, q8.information_from_chronic_disease, q8.GLIM_assessment_timestamp
 FROM hospitalization join 
-(SELECT t.hospitalization_id, t.timestamp, t.weight_value
-        FROM (SELECT weight_measurment.hospitalization_id, weight_measurment.timestamp, weight_measurment.value as weight_value,
-            ROW_NUMBER() over (PARTITION BY weight_measurment.hospitalization_id ORDER BY weight_measurment.timestamp DESC) as R
-        FROM weight_measurment) t
-        WHERE R = 1) q1 on hospitalization.id = q1.hospitalization_id
-    join
-    (SELECT t.hospitalization_id, t.timestamp, t.height_value
-        FROM (SELECT height_measurement.hospitalization_id, height_measurement.timestamp, height_measurement.value as height_value,
-            ROW_NUMBER() over (PARTITION BY height_measurement.hospitalization_id ORDER BY height_measurement.timestamp DESC) as R
-        FROM height_measurement) t
-        WHERE R = 1) q2 on hospitalization.id = q2.hospitalization_id) w1
+(SELECT t.hospitalization_id, t.timestamp as weight_timestamp, t.weight_value
+FROM (SELECT weight_measurment.hospitalization_id, weight_measurment.timestamp, weight_measurment.value as weight_value,
+    ROW_NUMBER() over (PARTITION BY weight_measurment.hospitalization_id ORDER BY weight_measurment.timestamp DESC) as R
+FROM weight_measurment) t
+WHERE R = 1) q1 on hospitalization.id = q1.hospitalization_id
 join
-(SELECT t.hospitalization_id, t.timestamp, t.choice, t.last_month, t.last_3_months, t.last_6_months
+(SELECT t.hospitalization_id, t.timestamp as height_timestamp, t.height_value
+FROM (SELECT height_measurement.hospitalization_id, height_measurement.timestamp, height_measurement.value as height_value,
+    ROW_NUMBER() over (PARTITION BY height_measurement.hospitalization_id ORDER BY height_measurement.timestamp DESC) as R
+FROM height_measurement) t
+WHERE R = 1) q2 on hospitalization.id = q2.hospitalization_id
+join
+(SELECT t.hospitalization_id, t.timestamp as weight_loss_timestamp, t.choice, t.last_month, t.last_3_months, t.last_6_months
 FROM (SELECT weight_loss.hospitalization_id, weight_loss.choice, weight_loss.last_month, weight_loss.last_3_months, weight_loss.last_6_months, weight_loss.timestamp,
         ROW_NUMBER() over (PARTITION BY weight_loss.hospitalization_id ORDER BY weight_loss.timestamp DESC) as R
     FROM weight_loss) t
-WHERE R = 1) w2 on w1.id = w2.hospitalization_id
+WHERE R = 1) q3 on hospitalization.id = q3.hospitalization_id
 join
-(SELECT q1.hospitalization_id, q1.acute_diseas, q1.strong_psychological_stress, q2.failure_to_eat_for_more_then_5_days
-FROM 
-(SELECT t.hospitalization_id, t.timestamp, t.strong_psychological_stress, t.acute_diseas
+(SELECT t.hospitalization_id, t.timestamp as med_staff_diagnosis_timestamp, t.strong_psychological_stress, t.acute_diseas, t.neuropsychological
 FROM (SELECT med_staff_diagnosis.hospitalization_id, med_staff_diagnosis.timestamp, med_staff_diagnosis.strong_psychological_stress, med_staff_diagnosis.acute_diseas,
+        med_staff_diagnosis.neuropsychological,
         ROW_NUMBER() over (PARTITION BY med_staff_diagnosis.hospitalization_id ORDER BY med_staff_diagnosis.timestamp DESC) as R
     FROM med_staff_diagnosis) t
-WHERE R = 1) q1
+WHERE R = 1) q4 on hospitalization.id = q4.hospitalization_id
 join
-(SELECT t.hospitalization_id as hospitalization_id2, t.timestamp, t.failure_to_eat_for_more_then_5_days
-FROM (SELECT nutrition_screening_assessment.hospitalization_id, nutrition_screening_assessment.timestamp, nutrition_screening_assessment.failure_to_eat_for_more_then_5_days,
-        ROW_NUMBER() over (PARTITION BY nutrition_screening_assessment.hospitalization_id ORDER BY nutrition_screening_assessment.timestamp DESC) as R
-    FROM nutrition_screening_assessment) t
-WHERE R = 1) q2 on q1.hospitalization_id = q2.hospitalization_id2) w3 on w1.id = w3.hospitalization_id
-join
-(SELECT t.hospitalization_id, t.timestamp, t.decreased_food_consumtpion_recently,
-    t.decreased_food_consumption_last_month, t.decresead_food_consumption_last_3_months
+(SELECT t.hospitalization_id, t.timestamp as nutrition_screening_assessment_timestamp, t.decreased_food_consumtpion_recently,
+    t.decreased_food_consumption_last_month, t.decresead_food_consumption_last_3_months, t.failure_to_eat_for_more_then_5_days, t.enternal_feeding
 FROM (SELECT nutrition_screening_assessment.hospitalization_id, nutrition_screening_assessment.timestamp, nutrition_screening_assessment.decreased_food_consumtpion_recently,
     nutrition_screening_assessment.decreased_food_consumption_last_month, nutrition_screening_assessment.decresead_food_consumption_last_3_months,
+    nutrition_screening_assessment.failure_to_eat_for_more_then_5_days, nutrition_screening_assessment.enternal_feeding,
         ROW_NUMBER() over (PARTITION BY nutrition_screening_assessment.hospitalization_id ORDER BY nutrition_screening_assessment.timestamp DESC) as R
     FROM nutrition_screening_assessment) t
-WHERE R = 1) w4 on w1.id = w4.hospitalization_id
+WHERE R = 1) q5 on hospitalization.id = q5.hospitalization_id
 join
-(SELECT t.hospitalization_id, t.timestamp, t.level_of_mobility
+(SELECT t.hospitalization_id, t.timestamp as mobility_measurment_timestamp, t.level_of_mobility
 FROM (SELECT mobility_measurment.hospitalization_id, mobility_measurment.timestamp, mobility_measurment.level_of_mobility,
         ROW_NUMBER() over (PARTITION BY mobility_measurment.hospitalization_id ORDER BY mobility_measurment.timestamp DESC) as R
     FROM mobility_measurment) t
-WHERE R = 1) w5 on w1.id = w5.hospitalization_id
+WHERE R = 1) q6 on hospitalization.id = q6.hospitalization_id
 join
-(SELECT t.hospitalization_id, t.timestamp, t.neuropsychological
-FROM (SELECT med_staff_diagnosis.hospitalization_id, med_staff_diagnosis.timestamp, med_staff_diagnosis.neuropsychological,
-        ROW_NUMBER() over (PARTITION BY med_staff_diagnosis.hospitalization_id ORDER BY med_staff_diagnosis.timestamp DESC) as R
-    FROM med_staff_diagnosis) t
-WHERE R = 1) w6 on w1.id = w6.hospitalization_id
-join
-(SELECT t.hospitalization_id, t.timestamp, t.value as muscle_mass_value
+(SELECT t.hospitalization_id, t.timestamp as muscle_mass_measurment_timestamp, t.value as muscle_mass_value
 FROM (SELECT muscle_mass_measurment.hospitalization_id, muscle_mass_measurment.timestamp, muscle_mass_measurment.value,
         ROW_NUMBER() over (PARTITION BY muscle_mass_measurment.hospitalization_id ORDER BY muscle_mass_measurment.timestamp DESC) as R
     FROM muscle_mass_measurment) t
-WHERE R = 1) w7 on w1.id = w7.hospitalization_id
+WHERE R = 1) q7 on hospitalization.id = q7.hospitalization_id
 join
-(SELECT t.hospitalization_id, t.timestamp, t.below_50_of_consumption_for_1_week, t.poor_consumption_for_more_than_2_weeks,
+(SELECT t.hospitalization_id, t.timestamp as GLIM_assessment_timestamp, t.below_50_of_consumption_for_1_week, t.poor_consumption_for_more_than_2_weeks,
     t.gastro_intestinal_condition, t.acute_illness_or_injury, t.information_from_chronic_disease
 FROM (SELECT GLIM_assessment.hospitalization_id, GLIM_assessment.timestamp, GLIM_assessment.below_50_of_consumption_for_1_week, GLIM_assessment.poor_consumption_for_more_than_2_weeks,
     GLIM_assessment.gastro_intestinal_condition, GLIM_assessment.acute_illness_or_injury, GLIM_assessment.information_from_chronic_disease,
         ROW_NUMBER() over (PARTITION BY GLIM_assessment.hospitalization_id ORDER BY GLIM_assessment.timestamp DESC) as R
     FROM GLIM_assessment) t
-WHERE R = 1) w8 on w1.id = w8.hospitalization_id'
+WHERE R = 1) q8 on hospitalization.id = q8.hospitalization_id
+
+'
 WITH RESULT SETS((hospitalization_id INT, MUST_score INT, MUST_outcome VARCHAR(255),
     MNA_SF_score INT, MNA_SF_outcome VARCHAR(255),
     SNAQ_score INT, SNAQ_outcome VARCHAR(255),
     GLIM_score INT, GLIM_outcome VARCHAR(255),
-    datetime datetime));
+    datetime datetime,
+    weight_timestamp datetime,
+    height_timestamp datetime,
+    weight_loss_timestamp datetime,
+    med_staff_diagnosis_timestamp datetime,
+    nutrition_screening_assessment_timestamp datetime,
+    mobility_measurment_timestamp datetime,
+    muscle_mass_measurment_timestamp datetime,
+    GLIM_assessment_timestamp datetime
+    ));
 
 END;
 GO
@@ -389,5 +434,3 @@ GO
 INSERT INTO result_nutrition_assessment
 EXECUTE assessment
 GO
-
-/*creare altra tabella con timestamp delle misurazioni + inserire id automatico nella tabella*/

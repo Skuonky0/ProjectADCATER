@@ -8,4 +8,13 @@ CREATE TABLE result_nutrition_assessment (
     SNAQ_outcome VARCHAR(255),
     GLIM_score INT,
     GLIM_outcome VARCHAR(255),
-    datetime datetime);
+    datetime datetime,
+    weight_timestamp datetime,
+    height_timestamp datetime,
+    weight_loss_timestamp datetime,
+    med_staff_diagnosis_timestamp datetime,
+    nutrition_screening_assessment_timestamp datetime,
+    mobility_measurment_timestamp datetime,
+    muscle_mass_measurment_timestamp datetime,
+    GLIM_assessment_timestamp datetime
+    );

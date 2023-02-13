@@ -3,7 +3,7 @@
     q3.choice, q3.last_month, q3.last_3_months, q3.last_6_months, q3.weight_loss_timestamp,
     q4.acute_diseas, q4.strong_psychological_stress, q4.neuropsychological, q4.med_staff_diagnosis_timestamp,
     q5.decreased_food_consumtpion_recently, q5.decreased_food_consumption_last_month, q5.decresead_food_consumption_last_3_months,
-    q5.enternal_feeding, q5.failure_to_eat_for_more_then_5_days, nutrition_screening_assessment_timestamp,
+    q5.enternal_feeding, q5.failure_to_eat_for_more_then_5_days, q5.nutrition_screening_assessment_timestamp,
     q6.level_of_mobility, q6.mobility_measurment_timestamp,
     q7.muscle_mass_value, q7.muscle_mass_measurment_timestamp,
     q8.below_50_of_consumption_for_1_week, q8.poor_consumption_for_more_than_2_weeks, q8.gastro_intestinal_condition,

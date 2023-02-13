@@ -1,15 +1,11 @@
 /* query aggregata */
 
-SELECT w1.id, w1.age, w1.weight_value, w1.w_timestamp, w1.height_value, w1.h_timestamp,
-    w2.choice, w2.last_month, w2.last_3_months, w2.last_6_months, w2.timestamp as wl_timestamp,
-    w3.acute_diseas, w3.strong_psychological_stress, w3.failure_to_eat_for_more_then_5_days,
-    w4.decreased_food_consumtpion_recently, w4.decreased_food_consumption_last_month, w4.decresead_food_consumption_last_3_months,
-    w5.level_of_mobility,
-    w6.neuropsychological,
-    w7.muscle_mass_value,
-    w8.below_50_of_consumption_for_1_week, w8.poor_consumption_for_more_than_2_weeks, w8.gastro_intestinal_condition,
-    w8.acute_illness_or_injury, w8.information_from_chronic_disease
-FROM (SELECT hospitalization.id, hospitalization.age, q1.weight_value, q2.height_value, q1.timestamp as w_timestamp, q2.timestamp as h_timestamp
+SELECT w1.id, w1.age, w1.weight_value, w1.height_value, w2.choice, w2.last_month, w2.last_3_months, w2.last_6_months, w3.acute_diseas,
+    w3.strong_psychological_stress, w3.failure_to_eat_for_more_then_5_days, w4.decreased_food_consumtpion_recently, w4.decreased_food_consumption_last_month,
+    w4.decresead_food_consumption_last_3_months, w5.level_of_mobility, w6.neuropsychological, w7.muscle_mass_value,
+    w8.below_50_of_consumption_for_1_week, w8.poor_consumption_for_more_than_2_weeks, w8.gastro_intestinal_condition, w8.acute_illness_or_injury,
+    w8.information_from_chronic_disease
+FROM (SELECT hospitalization.id, hospitalization.age, q1.weight_value, q2.height_value
 FROM hospitalization join 
 (SELECT t.hospitalization_id, t.timestamp, t.weight_value
         FROM (SELECT weight_measurment.hospitalization_id, weight_measurment.timestamp, weight_measurment.value as weight_value,
